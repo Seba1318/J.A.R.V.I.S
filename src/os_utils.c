@@ -5,7 +5,10 @@
 #include "os_utils.h"
 
 char* execute_command(const char* command){
-    FILE* pipe = popen(command, "r");
+    char full_command[512];
+    snprintf(full_command, sizeof(full_command), "%s 2>&1", command);
+
+    FILE* pipe = popen(full_command, "r"); //full_command used for adjusting logic and merging stderr and stdout
 
     if(!pipe){
         return strdup("Error: The process couldn't be opened in terminal!\n");
