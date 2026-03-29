@@ -6,7 +6,7 @@
 
 char* execute_command(const char* command){
     char full_command[512];
-    snprintf(full_command, sizeof(full_command), "%s 2>&1", command);
+    snprintf(full_command, sizeof(full_command), "%s </dev/null 2>&1", command);
 
     FILE* pipe = popen(full_command, "r"); //full_command used for adjusting logic and merging stderr and stdout
 

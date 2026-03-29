@@ -53,10 +53,15 @@ char* make_http_request(const char* url){
 
         if(res != CURLE_OK){
             fprintf(stderr, "[ERROR] curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-            free(chunk.response_text);
-        }
 
-        curl_easy_cleanup(curl);
+            if(chunk.response_text) {
+                free(chunk.response_text);
+            }
+
+            curl_easy_cleanup(curl);
+
+            return NULL;
+        }
     }
 
     return chunk.response_text;

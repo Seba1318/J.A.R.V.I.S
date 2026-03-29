@@ -4,6 +4,7 @@
 
 #include "os_utils.h"
 #include "network.h"
+#include "payload_handler.h"
 
 int main(){
     char user_command[256];
@@ -65,6 +66,21 @@ int main(){
             free(output);
         } else{
             printf("[ERROR] The command did not return a valid result.\n");
+        }
+
+        printf("--- J.A.R.V.I.S. JSON Payload Test ---\n\n");
+
+        const char* command = "Hello J.A.R.V.I.S.! Create a folder named secret_project.";
+        char* json_package = build_ai_payload(command);
+        
+        if (json_package != NULL) {
+            printf("Payload ready to be sent over the network:\n");
+            printf("%s\n\n", json_package);
+            
+            free(json_package);
+            json_package = NULL;
+        } else {
+            printf("[ERROR] Failed to generate JSON payload!\n");
         }
     }
 
