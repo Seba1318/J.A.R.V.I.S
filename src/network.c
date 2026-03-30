@@ -30,7 +30,7 @@ static size_t write_callback(void* contents, size_t size, size_t nmemb, void* cu
     return real_size;
 }
 
-char* make_http_request(const char* url){
+char* send_ai_payload(const char* url, const char* api_key, char* json_payload){
     CURL* curl;
     CURLcode res;
 
@@ -40,28 +40,36 @@ char* make_http_request(const char* url){
     
     curl = curl_easy_init();
 
-    if(curl){
-        curl_easy_setopt(curl, CURLOPT_URL, url);
+    if(!curl){
+        fprintf(stderr, "[ERROR] Failed to initialize libcurl for AI payload.\n");
+        free(chunk.response_text);
+        return NULL;
+    }
 
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    struct curl_slist* headers = NULL; // Initialize headers list, type is implemented as a linked list in libcurl
+    char auth_header[256]; // Will store the API key
 
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+    snprintf(auth_header, sizeof(auth_header), "x-goog-api-key: %s", api_key);
 
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, "JARVIS-Agent/1.0");
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+    headers = curl_slist_append(headers, auth_header);
 
-        res = curl_easy_perform(curl);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_payload);
 
-        if(res != CURLE_OK){
-            fprintf(stderr, "[ERROR] curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&chunk);
 
-            if(chunk.response_text) {
-                free(chunk.response_text);
-            }
+    res = curl_easy_perform(curl);
 
-            curl_easy_cleanup(curl);
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
 
-            return NULL;
-        }
+    if(res != CURLE_OK){
+        fprintf(stderr, "[NETWORK ERROR] curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        free(chunk.response_text);
+        return NULL;
     }
 
     return chunk.response_text;

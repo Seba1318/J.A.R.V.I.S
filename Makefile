@@ -5,7 +5,7 @@ SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin
 
-EXE = $(BIN_DIR)/ai_agent
+EXE = $(BIN_DIR)/jarvis
 
 OBJ = $(OBJ_DIR)/test_os.o $(OBJ_DIR)/os_utils.o $(OBJ_DIR)/network.o $(OBJ_DIR)/payload_handler.o
 

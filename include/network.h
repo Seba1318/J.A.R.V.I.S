@@ -3,6 +3,6 @@
 
 void test_internet_connection();
 
-char* make_http_request(const char* url);
+char* send_ai_payload(const char* url, const char* api_key, char* json_payload);
 
 #endif

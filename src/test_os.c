@@ -7,29 +7,25 @@
 #include "payload_handler.h"
 
 int main(){
-    char user_command[256];
+    const char* api_key = getenv("JARVIS_API_KEY");
 
-    printf("--- J.A.R.V.I.S OS Tester ---\n");
-
-    test_internet_connection();
-
-    printf("Fetching data from the Matrix...\n");
-    char* api_response = make_http_request("https://jsonplaceholder.typicode.com/todos/1");
-
-    if(api_response){
-        printf("--- API RESPONSE ---\n");
-        printf("%s", api_response);
-        printf("\n--------------------\n\n");
-
-        free(api_response);
-    } else{
-        printf("[ERROR] Failed to fetch data from API.\n");
+    if(api_key == NULL){
+        printf("[WARNING] No API Key found in environment variables. Some features may not work.\n\n");
+        return 0;
     }
 
-    printf("Type OS commands to test the capture. Type 'exit' to quit. \n\n");
+    const char* api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+
+    char user_command[512];
+
+    printf("=========================================\n");
+    printf("  J.A.R.V.I.S. System Initialized (v1.0)\n");
+    printf("=========================================\n\n");
+
+    // test_internet_connection();
 
     while(1){
-        printf("J.A.R.V.I.S> ");
+        printf(">");
 
         if(fgets(user_command, sizeof(user_command), stdin) == NULL){
             break;
@@ -53,36 +49,43 @@ int main(){
             continue; 
         }
 
-        char* output =  execute_command(user_command);
+        printf("[SYSTEM] Transmitting request to AI core...\n");
 
-        if(output){
-            printf("\n--- EXECUTION RESULT ---\n\n");
-            printf("%s\n", output);
+        char* json_payload = build_ai_payload(user_command);
 
-            if(strlen(output) > 0 && output[strlen(output) - 1] != '\n'){
-                printf("\n");
+        if(json_payload == NULL){
+            fprintf(stderr, "[ERROR] Failed to build AI payload.\n");
+            continue;
+        }
+
+        char* raw_response = send_ai_payload(api_url, api_key, json_payload);
+        free(json_payload);
+
+        if(raw_response){
+            char* jarvis_command = NULL;
+            char* jarvis_message = NULL;
+
+            parse_ai_response(raw_response, &jarvis_command, &jarvis_message);
+            free(raw_response);
+
+            if(jarvis_message){
+                printf("J.A.R.V.I.S.> %s\n", jarvis_message);
+                free(jarvis_message);
             }
 
-            free(output);
-        } else{
-            printf("[ERROR] The command did not return a valid result.\n");
-        }
+            if(jarvis_command && strlen(jarvis_command) > 0){
+                printf("[EXECUTING COMMAND] %s\n", jarvis_command);
 
-        printf("--- J.A.R.V.I.S. JSON Payload Test ---\n\n");
+                char* command_output = execute_command(jarvis_command);
 
-        const char* command = "Hello J.A.R.V.I.S.! Create a folder named secret_project.";
-        char* json_package = build_ai_payload(command);
-        
-        if (json_package != NULL) {
-            printf("Payload ready to be sent over the network:\n");
-            printf("%s\n\n", json_package);
-            
-            free(json_package);
-            json_package = NULL;
-        } else {
-            printf("[ERROR] Failed to generate JSON payload!\n");
+                free(jarvis_command);
+            } else{
+                free(jarvis_command);
+            }
         }
     }
+
+    printf("J.A.R.V.I.S.> System shutting down. Goodbye, Sir!\n");
 
     return 0;
 }
