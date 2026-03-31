@@ -5,7 +5,7 @@
 #include "os_utils.h"
 
 char* execute_command(const char* command){
-    char full_command[512];
+    char full_command[16384];
     snprintf(full_command, sizeof(full_command), "%s </dev/null 2>&1", command);
 
     FILE* pipe = popen(full_command, "r"); //full_command used for adjusting logic and merging stderr and stdout
@@ -14,7 +14,7 @@ char* execute_command(const char* command){
         return strdup("Error: The process couldn't be opened in terminal!\n");
     }
 
-    char buffer[256];
+    char buffer[16384];
     size_t current_size = 1; //Initially the buffer length would be 1, for the null terminator
     char* result = malloc(current_size);
 

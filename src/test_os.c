@@ -49,7 +49,7 @@ int main(){
             continue; 
         }
 
-        printf("[SYSTEM] Transmitting request to AI core...\n");
+        printf("[SYSTEM] Transmitting request to AI core...\n\n");
 
         char* json_payload = build_ai_payload(user_command);
 
@@ -69,14 +69,23 @@ int main(){
             free(raw_response);
 
             if(jarvis_message){
-                printf("J.A.R.V.I.S.> %s\n", jarvis_message);
+                printf("J.A.R.V.I.S.> %s\n\n", jarvis_message);
                 free(jarvis_message);
             }
 
             if(jarvis_command && strlen(jarvis_command) > 0){
-                printf("[EXECUTING COMMAND] %s\n", jarvis_command);
+                printf("[EXECUTING COMMAND] %s\n\n", jarvis_command);
 
                 char* command_output = execute_command(jarvis_command);
+
+                if (command_output != NULL) {
+                    // command_output[strcspn(command_output, "\r\n")] = 0;
+
+                    if (strlen(command_output) > 0) {
+                        printf("%s\n", command_output);
+                    }
+                    free(command_output); 
+                }
 
                 free(jarvis_command);
             } else{
