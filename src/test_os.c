@@ -14,7 +14,7 @@ int main(){
         return 0;
     }
 
-    const char* api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+    const char* api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent";
 
     char user_command[512];
 
