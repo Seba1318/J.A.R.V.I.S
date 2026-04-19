@@ -74,7 +74,18 @@ int main(){
             }
 
             if(jarvis_command && strlen(jarvis_command) > 0){
-                printf("[EXECUTING COMMAND] %s\n\n", jarvis_command);
+                char user_confirmation;
+                printf("The next command will be executed: %s\n", jarvis_command);
+                printf("Do you want to proceed? (y/n): ");
+                scanf(" %c", &user_confirmation);
+
+                if(user_confirmation != 'y' && user_confirmation != 'Y'){
+                    printf("Command execution cancelled by user.\n\n");
+                    free(jarvis_command);
+                    continue;
+                }
+
+                printf("[EXECUTING COMMAND]...\n");
 
                 char* command_output = execute_command(jarvis_command);
 

@@ -7,7 +7,7 @@ BIN_DIR = bin
 
 EXE = $(BIN_DIR)/jarvis
 
-OBJ = $(OBJ_DIR)/test_os.o $(OBJ_DIR)/os_utils.o $(OBJ_DIR)/network.o $(OBJ_DIR)/payload_handler.o
+OBJ = $(OBJ_DIR)/main.o $(OBJ_DIR)/os_utils.o $(OBJ_DIR)/network.o $(OBJ_DIR)/payload_handler.o
 
 all: $(EXE)
 
