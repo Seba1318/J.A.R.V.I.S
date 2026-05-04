@@ -51,58 +51,85 @@ int main(){
 
         printf("[SYSTEM] Transmitting request to AI core...\n\n");
 
-        char* json_payload = build_ai_payload(user_command);
+        char current_ai_prompt[MAX_COMMAND_SIZE];
+        strcpy(current_ai_prompt, user_command);
 
-        if(json_payload == NULL){
-            fprintf(stderr, "[ERROR] Failed to build AI payload.\n");
-            continue;
-        }
+        int ai_task_finished = 0;
 
-        char* raw_response = send_ai_payload(api_url, api_key, json_payload);
-        free(json_payload);
+        while(!ai_task_finished){
 
-        if(raw_response){
-            char* jarvis_command = NULL;
-            char* jarvis_message = NULL;
+            char* json_payload = build_ai_payload(current_ai_prompt);
 
-            parse_ai_response(raw_response, &jarvis_command, &jarvis_message);
-            free(raw_response);
-
-            if(jarvis_message){
-                printf("J.A.R.V.I.S.> %s\n\n", jarvis_message);
-                free(jarvis_message);
+            if(json_payload == NULL){
+                fprintf(stderr, "[ERROR] Failed to build AI payload.\n");
+                break;
             }
 
-            if(jarvis_command && strlen(jarvis_command) > 0){
-                char user_confirmation;
-                printf("The next command will be executed: %s\n", jarvis_command);
-                printf("Do you want to proceed? (y/n): ");
-                scanf(" %c", &user_confirmation);
+            char* raw_response = send_ai_payload(api_url, api_key, json_payload);
+            free(json_payload);
 
-                if(user_confirmation != 'y' && user_confirmation != 'Y'){
-                    printf("Command execution cancelled by user.\n\n");
-                    free(jarvis_command);
-                    continue;
+            if(raw_response){
+                char* jarvis_command = NULL;
+                char* jarvis_message = NULL;
+
+                parse_ai_response(raw_response, &jarvis_command, &jarvis_message);
+                free(raw_response);
+
+                if(jarvis_message){
+                    printf("J.A.R.V.I.S.> %s\n\n", jarvis_message);
+                    free(jarvis_message);
                 }
 
-                printf("[EXECUTING COMMAND]...\n");
+                if(jarvis_command && strlen(jarvis_command) > 0){
+                    char user_confirmation;
+                    printf("The next command will be executed: %s\n", jarvis_command);
+                    printf("Do you want to proceed? (y/n): ");
+                    scanf(" %c", &user_confirmation);
 
-                char* command_output = execute_command(jarvis_command);
+                    int c;
+                    while ((c = getchar()) != '\n' && c != EOF);
 
-                if (command_output != NULL) {
-                    // command_output[strcspn(command_output, "\r\n")] = 0;
-
-                    if (strlen(command_output) > 0) {
-                        printf("%s\n", command_output);
+                    if(user_confirmation != 'y' && user_confirmation != 'Y'){
+                        printf("Command execution cancelled by user.\n\n");
+                        free(jarvis_command);
+                        ai_task_finished = 1;
+                        continue;
                     }
-                    free(command_output); 
-                }
 
-                free(jarvis_command);
+                    printf("[EXECUTING COMMAND]...\n");
+
+                    char* command_output = execute_command(jarvis_command);
+
+                    if (command_output != NULL) {
+
+                        if (strlen(command_output) > 0) {
+                            printf("\n[TERMINAL OUTPUT]:\n%s\n", command_output);
+                        } else {
+                            char* empty_msg = "(Command executed successfully, but returned no output.)";
+                            printf("\n[TERMINAL OUTPUT]:\n%s\n\n", empty_msg);
+                            
+                            command_output = realloc(command_output, strlen(empty_msg) + 1);
+                            strcpy(command_output, empty_msg);
+                        }
+
+                        snprintf(current_ai_prompt, sizeof(current_ai_prompt), 
+                            "[SYSTEM AUTOMATED FEEDBACK]\nThe command you just ran outputted this data:\n%s\n\n"
+                            "Based on this output, generate the next command to fulfill the user's original request: '%s'. "
+                            "If the task is fully complete, leave the 'command' field COMPLETELY EMPTY.", 
+                            command_output, user_command);
+
+                        free(command_output); 
+                    }
+                    free(jarvis_command);
+                } else{
+                    free(jarvis_command);
+                    ai_task_finished = 1;
+                }
             } else{
-                free(jarvis_command);
+                ai_task_finished = 1;
             }
         }
+
     }
 
     printf("J.A.R.V.I.S.> System shutting down. Goodbye, Sir!\n");

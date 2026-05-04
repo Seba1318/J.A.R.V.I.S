@@ -32,7 +32,9 @@ char* build_ai_payload(const char* user_command){
         "5. CONVERSATIONAL RULE: If the user just greets you or NO terminal action is required, leave the 'command' value COMPLETELY EMPTY (\"\"). Do NOT output 'true', 'echo', or any placeholder.\n"
         "6. ANTI-HALLUCINATION RULE: NEVER guess, invent, or predict the output of a command (like file or folder names) in your 'message'. If you are executing a command to find information, your message must only state your intent (e.g., 'Searching your system now, Sir.'). Let the terminal output provide the actual data.\n"
         "7. Respond STRICTLY with a valid raw JSON object on a SINGLE physical line. Escape all internal double quotes as \\\" and all internal newlines as \\n.\n"
-        "JSON format: {\"command\": \"...\", \"message\": \"...\"} (No Markdown, no ```json blocks). (In your message, you will always address the user as 'Sir').", cwd, user_command);
+        "JSON format: {\"command\": \"...\", \"message\": \"...\"} (No Markdown, no ```json blocks). (In your message, you will always address the user as 'Sir')."
+        "8. You may search the user's entire home directory (~), but NEVER modify or delete system files.", cwd, user_command);
+
     cJSON_AddStringToObject(part_obj, "text", full_command);
     cJSON_AddItemToArray(parts_array, part_obj);
     cJSON_AddItemToObject(content_obj, "parts", parts_array);
