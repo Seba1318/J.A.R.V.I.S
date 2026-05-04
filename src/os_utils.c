@@ -15,7 +15,7 @@ char* execute_command(const char* command){
     }
 
     char buffer[MAX_OUTPUT_SIZE];
-    size_t current_size = 1; //Initially the buffer length would be 1, for the null terminator
+    size_t current_size = 1; //Initially the result length would be 1, for the null terminator
     char* result = malloc(current_size);
 
     if(!result){

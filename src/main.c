@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <curl/curl.h>
 
 #include "os_utils.h"
 #include "network.h"
@@ -16,11 +17,13 @@ int main(){
 
     const char* api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent";
 
-    char user_command[512];
+    char user_command[MAX_COMMAND_SIZE - 16];
 
     printf("=========================================\n");
     printf("  J.A.R.V.I.S. System Initialized (v1.0)\n");
     printf("=========================================\n\n");
+
+    curl_global_init(CURL_GLOBAL_DEFAULT);
 
     // test_internet_connection();
 
@@ -51,7 +54,7 @@ int main(){
 
         printf("[SYSTEM] Transmitting request to AI core...\n\n");
 
-        char current_ai_prompt[MAX_COMMAND_SIZE];
+        char current_ai_prompt[MAX_COMMAND_SIZE + MAX_OUTPUT_SIZE + 512];
         strcpy(current_ai_prompt, user_command);
 
         int ai_task_finished = 0;
@@ -133,6 +136,8 @@ int main(){
     }
 
     printf("J.A.R.V.I.S.> System shutting down. Goodbye, Sir!\n");
+
+    curl_global_cleanup();
 
     return 0;
 }
