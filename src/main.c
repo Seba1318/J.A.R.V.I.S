@@ -2,10 +2,50 @@
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
+#include <pthread.h>
+#include <unistd.h>
 
 #include "os_utils.h"
 #include "network.h"
 #include "payload_handler.h"
+
+volatile int ai_is_thinking = 0;
+
+void* loading_animation(void* arg) {
+    const char* messages[] = {
+        "J.A.R.V.I.S. is thinking...",
+        "J.A.R.V.I.S. is processing...",
+        "J.A.R.V.I.S. is analyzing...",
+        "J.A.R.V.I.S. is formulating..."
+    };
+    int num_messages = 4;
+    int msg_idx = 0;
+
+    while (ai_is_thinking) {
+        const char* current_msg = messages[msg_idx];
+        int len = strlen(current_msg);
+
+        printf("\r                                          \r");
+        fflush(stdout);
+
+        for (int i = 0; i < len && ai_is_thinking; i++) {
+            printf("%c", current_msg[i]);
+            fflush(stdout);
+            usleep(50000); 
+        }
+
+        for (int p = 0; p < 20 && ai_is_thinking; p++) {
+            usleep(50000); 
+        }
+
+        msg_idx = (msg_idx + 1) % num_messages; 
+    }
+
+    printf("\r                                          \r");
+    fflush(stdout);
+    
+    return NULL;
+}
 
 int main(){
     const char* api_key = getenv("JARVIS_API_KEY");
@@ -68,7 +108,15 @@ int main(){
                 break;
             }
 
+            ai_is_thinking = 1;
+            pthread_t loading_thread;
+            pthread_create(&loading_thread, NULL, loading_animation, NULL);
+
             char* raw_response = send_ai_payload(api_url, api_key, json_payload);
+
+            ai_is_thinking = 0;
+            pthread_join(loading_thread, NULL);
+            
             free(json_payload);
 
             if(raw_response){

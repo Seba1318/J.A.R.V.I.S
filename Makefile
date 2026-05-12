@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Iinclude
-LDFLAGS = -lcurl -lcjson
+LDFLAGS = -lcurl -lcjson -pthread
 SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin
